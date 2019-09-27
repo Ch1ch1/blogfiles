@@ -1,0 +1,51 @@
+version: "3.6"
+
+#######################################
+##             Traefik               ##
+#######################################
+
+services:
+
+  app:
+    image: "traefik:v2.0.0"
+
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    networks:
+        - lan_nosecure
+    environment:
+      - "CF_API_EMAIL=me@mail.com"
+      - "CF_API_KEY=my_super_secret_token"
+    volumes:
+      - "/var/data/traefik2/letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/var/data/traefik2/conf/traefik.toml:/etc/traefik/traefik.toml"
+      - "/var/data/traefik2/log/:/log"
+      - "/var/data/traefik2/conf:/config"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+    deploy:
+        mode: global
+        placement:
+            constraints:
+                - node.labels.role == frontend
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+
+
+#######################################
+##             Network               ##
+#######################################
+
+networks:
+    lan_nosecure:
+        external: true
