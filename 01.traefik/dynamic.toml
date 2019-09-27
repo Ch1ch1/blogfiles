@@ -1,0 +1,50 @@
+# dynamic.toml
+## dynamic configuration
+
+[http.routers]
+  [http.routers.redirecttohttps]
+    entryPoints = ["http"]
+    middlewares = ["httpsredirect"]
+    rule = "HostRegexp(`{host:.+}`)"
+    service = "noop"
+    
+  [http.routers.traefik]
+    entryPoints = ["https"]
+    service = "api@internal"
+    middlewares = ["home-ipwhitelist@file", "security-headers@file"]
+    rule = "Host(`traefik.ch1.ninja`)"
+    [http.routers.traefik.tls]
+      certResolver = "cloudflare"
+      
+[http.services]
+  # noop service, the URL will be never called
+  [http.services.noop.loadBalancer]
+    [[http.services.noop.loadBalancer.servers]]
+      url = "http://pony.club"
+
+[http.middlewares]
+  [http.middlewares.httpsredirect.redirectScheme]
+    scheme = "https"
+    permanent = true
+    
+  [http.middlewares.security-headers.headers]
+      # CORS
+      AccessControlAllowMethods = ["GET", "OPTIONS", "PUT"]
+      AccessControlAllowOrigin = "origin-list-or-null"
+      AccessControlMaxAge = 100
+      #AddVaryHeader = true
+      BrowserXssFilter = true
+      ContentTypeNosniff = true
+      ForceSTSHeader = true
+      FrameDeny = true
+      SSLRedirect = true
+      #STSIncludeSubdomains = true
+      STSPreload = true
+      CustomFrameOptionsValue = "SAMEORIGIN"
+      ReferrerPolicy = "same-origin"
+      FeaturePolicy = "geolocation 'self'"
+      STSSeconds = 315360000
+
+  [http.middlewares.home-ipwhitelist.ipWhiteList]
+    sourceRange = ["homeip/32"]
+
