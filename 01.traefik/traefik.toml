@@ -1,0 +1,52 @@
+[global]
+  checkNewVersion = true
+  sendAnonymousUsage = true
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+[providers]
+  [providers.docker]
+    watch = true
+    endpoint = "unix:///var/run/docker.sock"
+    exposedByDefault = false
+#    useBindPortIP = true
+    swarmMode = true
+    network = "lan_nosecure"
+  [providers.file]
+    directory = "/config"
+    watch = true
+
+[api]
+  insecure = false
+  dashboard = true
+  debug = true
+
+[metrics]
+  [metrics.influxDB]
+    address = "http://IP:8086"
+    protocol = "http"
+    pushInterval = "10s"
+    database = "traefik"
+    retentionPolicy = ""
+    addEntryPointsLabels = true
+    addServicesLabels = true
+
+[log]
+  level = "error"
+  filePath = "/log/traefik.log"
+
+[accessLog]
+  filePath = "/log/access.log"
+
+[certificatesResolvers]
+  [certificatesResolvers.cloudflare]
+    [certificatesResolvers.cloudflare.acme]
+      email = "me@domain.com"
+      storage = "/letsencrypt/acme.json"
+#      caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+      [certificatesResolvers.cloudflare.acme.dnsChallenge]
+        provider = "cloudflare"
+        delayBeforeCheck = 10
