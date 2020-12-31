@@ -1,5 +1,5 @@
   [tls.options]
-  
+
    [tls.options.default]
       sniStrict = true
       cipherSuites = [
